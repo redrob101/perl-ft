@@ -62,8 +62,7 @@ sub TransferMultipleFilesSftp {
             $user = $ARGV[1];
             $host = $ARGV[2];
             say "no '-l' and no key specified";
-            $key = "";
-            $command = "$trCommand $key $file $user\@$host:$file";
+            $command = "$trCommand $file $user\@$host:$file";
             system ("$command");
         }
         elsif ($ARGV[0] ne "-l" and $ARGV[0] ne "-s" and $ARGV[3] ne "") #no '-l' or '-s' and key specified
@@ -98,7 +97,7 @@ sub TransferMultipleFilesSftp {
         }
         elsif ($ARGV[0] eq "-s" and $#ARGV == 3) # '-s', no '-l' and no key 
         {
-            say "'-s' and no key";
+            say "'-s' and no key specified";
             $trCommand = "sftp";
             $file = $ARGV[1];
             $user = $ARGV[2];
@@ -119,7 +118,7 @@ sub TransferMultipleFilesSftp {
         }
         elsif($ARGV[0] eq "-s" and $ARGV[1] eq "-l" and $#ARGV == 4) # '-s','-l' and no key
         {
-            say "-s, -l and no key";
+            say "'-s', '-l' and no key specified";
             $trCommand = "sftp";
             $key = "";
             $filelist = $ARGV[2];
@@ -129,7 +128,7 @@ sub TransferMultipleFilesSftp {
         }
         elsif ($ARGV[0] eq "-s" and $ARGV[1] eq "-l" and $#ARGV == 5) # -s','-l' and key specified
         {
-            say "-s, -l and key specified";
+            say "'-s', '-l' and key specified";
             $trCommand = "sftp -i";
             $key = $ARGV[5];
             $filelist = $ARGV[2];
