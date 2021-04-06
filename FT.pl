@@ -52,7 +52,7 @@ sub TransferMultipleFilesSftp {
 
     if($#ARGV < 2) # too few params
     {
-        say "\nusage: perl $0 <file (or -l <listfile>)> <user> <host> [optional key (path of the key file)] [-s (optional - use sftp)]\n";
+        say "\nusage: perl $0 [-s (optional - use sftp)] <file (or -l <listfile>)> <user> <host> [optional key (path of the key file)]\n";
     }
     else # right # of params
     {
