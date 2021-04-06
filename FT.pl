@@ -10,16 +10,151 @@ my $host = $ARGV[2];
 my $key = $ARGV[3];
 my $filelist;
 my $Ttype;
-my $trCommand = "";
-my $here_doc= "";
+my $trCommand;
+my $here_doc;
 my $FH;
+my $answer;
 
 sub scpTransfer_file {
     system("$trCommand $key $file $user\@$host:$file");
 }
+
 sub sftpTransfer_file {
     system("$trCommand $key $user\@$host $here_doc");
 }
+
+sub askTransferMethod {
+    while(1) 
+    {
+        say "Please choose transfer method:\n1) scp\n2) sftp";
+        $answer = <STDIN>;
+        chomp $answer;
+        if ($answer eq "1" and $#ARGV == 2) # no '-l' and  no key specified and TM = scp
+        {
+            $key = "";
+            #say "\nstep #1\n";
+            $trCommand = "scp";
+            &scpTransfer_file;
+            last;
+        }
+        elsif ($answer eq "2" and $#ARGV == 2) # no '-l' and no key specified and TM = sftp
+        {
+            $key = "";
+            #say "\nstep #2\n";
+            $trCommand = "sftp";
+            $here_doc = "<<EOT
+                        put ".$file."
+                        quit
+                        EOT";
+            &sftpTransfer_file;
+            last;
+        }
+        elsif ($answer eq "1" and $ARGV[3] ne "" and $ARGV[0] ne "-l") # no '-l' and key specified and TM = scp
+        {
+            #say "\nstep #3\n";
+            $trCommand = "scp -i";
+            &scpTransfer_file;
+            last;
+        }
+        elsif ($answer eq "2" and $ARGV[0] ne "-l" and $#ARGV == 3) # no '-l' and key specified and TM = sftp
+        {
+            #say "\nstep #4\n";
+            $trCommand = "sftp -i";
+            $here_doc = "<<EOT
+                        put ".$file."
+                        quit
+                        EOT";
+            &sftpTransfer_file;
+            last;
+        }
+        elsif ($answer eq "1" and $ARGV[0] eq "-l" and $#ARGV == 3) # '-l' specified, no key and TM = scp
+        {
+            #say "\nstep #5\n";
+            $trCommand = "scp";
+            $key = "";
+            $filelist = $ARGV[1];
+            $user = $ARGV[2];
+            $host = $ARGV[3];
+            open ($FH, '<', $filelist) or die "Cannot open ".$filelist;
+            while (my $line = <$FH>) 
+            {
+                chomp($line);
+                $file=$line;
+                &scpTransfer_file;
+            }
+            close $FH;
+            last;
+        }
+        elsif ($answer eq "2" and $ARGV[0] eq "-l" and $#ARGV == 3) # '-l' specified, no key and TM = sftp
+        {
+            #say "\nstep #6\n";
+            $trCommand = "sftp";
+            $key = "";
+            $filelist = $ARGV[1];
+            $user = $ARGV[2];
+            $host = $ARGV[3];
+            open ($FH, '<', $filelist) or die "Cannot open ".$filelist;
+            while (my $line = <$FH>)
+            {
+                chomp($line);
+                $file=$line;
+                $here_doc = "<<EOT
+                        put ".$file."
+                        quit
+                        EOT";
+                &sftpTransfer_file;
+            }
+            close $FH;
+            last;
+        }
+        elsif ($answer eq "1" and $ARGV[0] eq "-l" and $#ARGV == 4) # '-l' specified, key and TM = scp
+        {
+            #say "\nstep #7\n";
+            $trCommand = "scp -i";
+            $key = $ARGV[4];
+            $filelist = $ARGV[1];
+            $user = $ARGV[2];
+            $host = $ARGV[3];
+            open ($FH, '<', $filelist) or die "Cannot open ".$filelist;
+            while (my $line = <$FH>)
+            {
+                chomp($line);
+                $file=$line;
+                &scpTransfer_file;
+            }
+            close $FH;
+            last;
+        }
+        elsif ($answer eq "2" and $ARGV[0] eq "-l" and $#ARGV == 4) # '-l' specified, key and TM = sftp
+        {
+            #say "\nstep #8\n";
+            $trCommand = "sftp -i";
+            $key = $ARGV[4];
+            $filelist = $ARGV[1];
+            $user = $ARGV[2];
+            $host = $ARGV[3];
+            open ($FH, '<', $filelist) or die "Cannot open ".$filelist;
+            while (my $line = <$FH>)
+            {
+                chomp($line);
+                $file=$line;
+                $here_doc = "<<EOT
+                        put ".$file."
+                        quit
+                        EOT";
+                &sftpTransfer_file;
+            }
+            close $FH;
+            last;
+        }
+        else
+        {
+            say "you MUST choose a transfer method"
+        }
+    }
+}
+### end of subs
+
 while(1)
 {
     if($#ARGV < 2) # too few params
@@ -29,159 +164,32 @@ while(1)
     }
     else # right # of params
     {
-        if ($ARGV[0] ne "-l" and $ARGV[3] eq "") # no "-l" and no key
+        if ($ARGV[0] ne "-l" and $#ARGV == 2) # no "-l" and no key
         {
-            $key = "";
-            say "Please choose transfer method:\n1) scp\n2) sftp";
-            my $answer = <STDIN>;
-            chomp $answer;
-            if ($answer eq "1")
-            {
-                say "Transfer method: SCP";
-                $trCommand = "scp";
-                &scpTransfer_file;
-                last;
-            }
-            elsif($answer eq "2")
-            {
-                say "Transfer method: SFTP";
-                $trCommand = "sftp";
-                $here_doc = "<<EOT
-                            put ".$file."
-                            quit
-                            EOT";
-                &sftpTransfer_file;
-                last;
-            }
-            else 
-            {
-                say "you MUST specify a file transfer method";
-            }
+            say "no '-l' and no key specified";
+            &askTransferMethod;
+            last;
         }
-        
+
         elsif ($ARGV[0] ne "-l" and $ARGV[3] ne "") #no -l and key specified
         {
-            say "Please choose transfer method:\n1) scp\n2) sftp";
-            my $answer = <STDIN>;
-            chomp $answer;
-            if ($answer eq "1")
-            {
-                say "Transfer method: SCP";
-                $trCommand = "scp -i";
-                &scpTransfer_file;
-                last;
-            }
-            elsif($answer eq "2")
-            {
-                say "Transfer method: SFTP";
-                $trCommand = "sftp -i";
-                $here_doc = "<<EOT
-                            put ".$file."
-                            quit
-                            EOT";
-                &sftpTransfer_file;
-                last;
-            }
-            else 
-            {
-                say "you MUST specify a file transfer method";
-            }
+            say "no '-l' and key specified";
+            &askTransferMethod;
+            last;
         }
-        
         elsif($ARGV[0] eq "-l" and $#ARGV == 3) # '-l' and no key specified
         {
-            say "Please choose transfer method:\n1) scp\n2) sftp";
-            my $answer = <STDIN>;
-            $host = $ARGV[3];
-            $user = $ARGV[2];
-            chomp $answer;
-            $filelist = $ARGV[1];
-            open ($FH, '<', $filelist) or die "Cannot open ".$filelist;
-            if ($answer eq "1") # you choose scp
-            {
-                say "Transfer method: SCP";
-                $trCommand = "scp";
-                $key = "";
-                while (my $line = <$FH>) 
-                {
-                    chomp($line);
-                    $file=$line;
-                    &scpTransfer_file;
-                }
-                last;
-            }
-            elsif ($answer == 2) # you choose SFTP
-            {
-                say "transfer method: SFTP";
-                $trCommand = "sftp";
-                $key = "";
-                while (my $line = <$FH>) 
-                {
-                    chomp($line);
-                    $file=$line;
-                    $here_doc = "<<EOT
-                                put ".$file."
-                                quit
-                                EOT";
-                    &sftpTransfer_file;
-                }
-                last;
-                close $FH;
-            }
-            else 
-            {
-                say "you MUST specify a file transfer method";
-            }
-            
+            &askTransferMethod;
+            last;
         } 
         elsif($ARGV[0] eq "-l" and $#ARGV == 4) # '-l and key specified
         {
-            say @ARGV;
-            $key = $ARGV[4];
-            $host = $ARGV[3];
-            $user = $ARGV[2];
-            say "Please choose transfer method:\n1) scp\n2) sftp";
-            my $answer = <STDIN>;
-            chomp $answer;
-            $filelist = $ARGV[1];
-            open ($FH, '<', $filelist) or die "Cannot open ".$filelist;
-            if ($answer eq "1") # you choose scp
-            {
-                say "Transfer method: SCP";
-                $trCommand = "scp";
-                $key = "";
-                while (my $line = <$FH>) 
-                {
-                    chomp($line);
-                    $file=$line;
-                    &scpTransfer_file;
-                }
-                last;
-            }
-            elsif ($answer == 2) # you choose SFTP
-            {
-                say "transfer method: SFTP";
-                $trCommand = "sftp";
-                $key = "";
-                while (my $line = <$FH>) 
-                {
-                    chomp($line);
-                    $file=$line;
-                    $here_doc = "<<EOT
-                                put ".$file."
-                                quit
-                                EOT";
-                    &sftpTransfer_file;
-                }
-                last;
-                close $FH;
-            }
+            &askTransferMethod;
+            last;
         }
         else
         {
             say "\nPlease check your parameters, maybe there's something wrong\n";
-            say "$ARGV[0]";
-            say "$#ARGV";
             last;
         }
     }
