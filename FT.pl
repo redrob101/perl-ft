@@ -117,7 +117,7 @@ sub TransferMultipleFilesSftp {
             $command = "$trCommand $key $user\@$host $here_doc";
             system($command);
         }
-        elsif($ARGV[0] eq "-s" and $ARGV[1] eq "-l" and $#ARGV == 4)
+        elsif($ARGV[0] eq "-s" and $ARGV[1] eq "-l" and $#ARGV == 4) # '-s','-l' and no key
         {
             say "-s, -l and no key";
             $trCommand = "sftp";
@@ -127,7 +127,7 @@ sub TransferMultipleFilesSftp {
             $host = $ARGV[4];
             &TransferMultipleFilesSftp;
         }
-        elsif ($ARGV[0] eq "-s" and $ARGV[1] eq "-l" and $#ARGV == 5)
+        elsif ($ARGV[0] eq "-s" and $ARGV[1] eq "-l" and $#ARGV == 5) # -s','-l' and key specified
         {
             say "-s, -l and key specified";
             $trCommand = "sftp -i";
