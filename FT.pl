@@ -155,12 +155,9 @@ sub askTransferMethod {
 }
 ### end of subs
 
-while(1)
-{
     if($#ARGV < 2) # too few params
     {
         say "\nusage: perl $0 <file (or -l <listfile>)> <user> <host> [optional key (path of the key file)]\n";
-        last;
     }
     else # right # of params
     {
@@ -168,29 +165,24 @@ while(1)
         {
             say "no '-l' and no key specified";
             &askTransferMethod;
-            last;
         }
 
         elsif ($ARGV[0] ne "-l" and $ARGV[3] ne "") #no -l and key specified
         {
             say "no '-l' and key specified";
             &askTransferMethod;
-            last;
         }
         elsif($ARGV[0] eq "-l" and $#ARGV == 3) # '-l' and no key specified
         {
             &askTransferMethod;
-            last;
         } 
         elsif($ARGV[0] eq "-l" and $#ARGV == 4) # '-l and key specified
         {
             &askTransferMethod;
-            last;
         }
         else
         {
             say "\nPlease check your parameters, maybe there's something wrong\n";
-            last;
         }
     }
 }
