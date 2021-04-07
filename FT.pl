@@ -1,4 +1,6 @@
 #!/usr/bin/perl
+# A simple file transfer application which uses scp
+# you can choose tu use sftp by specifying the '-s' parameter
 
 use strict;
 use warnings;
@@ -58,20 +60,20 @@ sub TransferMultipleFilesSftp {
     {
         if ($ARGV[0] ne "-l" and $ARGV[0] ne "-s" and $#ARGV == 2) # no '-l' or '-s' and no key specified
         {
+            say "no '-l' and no key specified";
             $file = $ARGV[0];
             $user = $ARGV[1];
             $host = $ARGV[2];
-            say "no '-l' and no key specified";
             $command = "$trCommand $file $user\@$host:$file";
             system ("$command");
         }
         elsif ($ARGV[0] ne "-l" and $ARGV[0] ne "-s" and $ARGV[3] ne "") #no '-l' or '-s' and key specified
         {
+            say "no '-l' and key specified";
             $file = $ARGV[0];
             $user = $ARGV[1];
             $host = $ARGV[2];
             $key = $ARGV[3];
-            say "no '-l' and key specified";
             $trCommand= "scp -i";
             $command = "$trCommand $key $file $user\@$host:$file";
             system ("$command");
