@@ -2,7 +2,7 @@
 # A simple file transfer application which uses scp
 # you can use sftp by specifying the '-s' parameter
 # you can also specify a list of files in a txt format with '-l'
-# usage: perl FT.pl [-s (optional - use sftp)] <file (or -l <listfile>)> <user> <host> [optional key (path of the key file)]
+# usage: perl FT.pl [optional -s (use sftp)] <file (or -l <listfile>)> <user> <host> [optional key (path of the key file)]
 
 use strict;
 use warnings;
