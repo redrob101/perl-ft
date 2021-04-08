@@ -14,10 +14,10 @@ my $hd = "";
 
 sub TransferMultipleFilesScp {
     if ($key eq ""){
-        say "\ntransferring multiple files using scp\n";
+        say "\ntransferring multiple files using \'scp\'\n";
     }
     elsif ($key ne ""){
-        say "\ntransferring multiple files using scp and the provided key $key\n";
+        say "\ntransferring multiple files using \'scp\' and the provided key \'$key\'\n";
     }
     open my $FH, '<', $listfile or die "Cant open file '$listfile' $!";
     while (my $line = <$FH>)
@@ -32,10 +32,10 @@ sub TransferMultipleFilesScp {
 
 sub TransferMultipleFilesSftp {
     if ($key eq ""){
-        say "\ntransferring multiple files using scp\n";
+        say "\ntransferring multiple files using \'sftp\'\n";
     }
     elsif ($key ne ""){
-        say "\ntransferring multiple files using scp and the provided key $key\n";
+        say "\ntransferring multiple files using \'sftp\' and the provided key \'$key\'\n";
     }
     open my $FH, '<', $listfile or die "Cant open file '$listfile' $!";
     while (my $line = <$FH>)
@@ -77,18 +77,21 @@ GetOptions('t=s' => \ $transfer_type,
     } elsif ($listfile ne "" and $key ne "" and $transfer_type ne "sftp"){ #key and list
         $transfer_type = "scp -i";
         &TransferMultipleFilesScp;
-    } elsif($transfer_type eq "sftp" and $listfile eq "" and $key eq ""){ #sftp, no key and no list
+    }
+    elsif($transfer_type eq "sftp" and $listfile eq "" and $key eq ""){ #sftp, no key and no list
         say "\ntransferring a single file using 'sftp'\n";
         $command = "$transfer_type $user\@$host $hd";
         system ($command);
-    } elsif($transfer_type eq "sftp" and $listfile eq "" and $key ne ""){ #sftp, key and no list
+    }elsif($transfer_type eq "sftp" and $listfile eq "" and $key ne ""){ #sftp, key and no list
         say "\ntransferring a single file using 'sftp' and the provided key \'$key\'\n";
         $transfer_type = "sftp -i";
         $command = "$transfer_type $key $user\@$host $hd"; 
         system ($command);
-    } elsif ($transfer_type eq "sftp" and $listfile ne "" and $key eq ""){ #sftp, list and no key
+    }
+    elsif ($transfer_type eq "sftp" and $listfile ne "" and $key eq ""){ #sftp, list and no key
         TransferMultipleFilesSftp;
-    } elsif ($transfer_type eq "sftp" and $listfile ne "" and $key ne "") { #sftp, list and key
+    }
+    elsif ($transfer_type eq "sftp" and $listfile ne "" and $key ne "") { #sftp, list and key
         $transfer_type = "sftp -i";
         TransferMultipleFilesSftp;
     }
