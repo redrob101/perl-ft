@@ -57,14 +57,16 @@ GetOptions('t=s' => \ $transfer_type,
            'k=s' => \ $key,
            'u=s' => \ $user,
            'h=s' => \ $host,
-           'f=s' => \ $file) or die "\nplease check your arguments are correct";
+           'f=s' => \ $file) or die "\nPlease check your arguments are correct";
 
    $hd = "<<EOT
          put ".$file."
          quit
          EOT";
 
-    if ($key eq "" and $listfile eq "" and $transfer_type ne "sftp") { #no key and no list
+    die "This script requires at least three arguments: -f <filename> (or -l <listfile>) -u <username> -h <host> " unless (($file || $listfile)  && $user && $host);
+
+    if ($key eq "" and $listfile eq "" and $transfer_type ne "sftp" and $user ne "" and $host ne "") { #no key and no list
         $command = "$transfer_type $file $user\@$host:$file";
         say "\ntransferring a single file using 'scp'\n";
         system($command);
@@ -77,21 +79,20 @@ GetOptions('t=s' => \ $transfer_type,
     } elsif ($listfile ne "" and $key ne "" and $transfer_type ne "sftp"){ #key and list
         $transfer_type = "scp -i";
         &TransferMultipleFilesScp;
-    }
-    elsif($transfer_type eq "sftp" and $listfile eq "" and $key eq ""){ #sftp, no key and no list
+    } elsif($transfer_type eq "sftp" and $listfile eq "" and $key eq ""){ #sftp, no key and no list
         say "\ntransferring a single file using 'sftp'\n";
         $command = "$transfer_type $user\@$host $hd";
         system ($command);
-    }elsif($transfer_type eq "sftp" and $listfile eq "" and $key ne ""){ #sftp, key and no list
+    } elsif($transfer_type eq "sftp" and $listfile eq "" and $key ne ""){ #sftp, key and no list
         say "\ntransferring a single file using 'sftp' and the provided key \'$key\'\n";
         $transfer_type = "sftp -i";
         $command = "$transfer_type $key $user\@$host $hd"; 
         system ($command);
-    }
-    elsif ($transfer_type eq "sftp" and $listfile ne "" and $key eq ""){ #sftp, list and no key
+    } elsif ($transfer_type eq "sftp" and $listfile ne "" and $key eq ""){ #sftp, list and no key
         TransferMultipleFilesSftp;
-    }
-    elsif ($transfer_type eq "sftp" and $listfile ne "" and $key ne "") { #sftp, list and key
+    } elsif ($transfer_type eq "sftp" and $listfile ne "" and $key ne "") { #sftp, list and key
         $transfer_type = "sftp -i";
         TransferMultipleFilesSftp;
+    } elsif ($file eq "" and $user eq "" and $host eq ""){
+        say "you need to specify at least three parameters: -f -u -h\n Example: perl $0 -f <filename> -u <user> -h <host>";
     }
